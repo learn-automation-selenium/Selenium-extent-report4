@@ -1,7 +1,6 @@
 package reporter;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import org.testng.ITestResult;
@@ -24,11 +23,12 @@ public class ExtentBase extends TestBase {
 
 	public ExtentSparkReporter extentHtmlReporter;
 	public ExtentReports extentReports;
-	public ExtentTest extentTest;
+	public ExtentTest extentLogger;
 	
 
 	@BeforeClass
 	public void prerequisite() {
+		//downloads Chrome driver for chrome browser
 		WebDriverManager.chromedriver().setup();
 	}
 	
@@ -36,7 +36,6 @@ public class ExtentBase extends TestBase {
 	public void extentReportSetUp() {
 		extentHtmlReporter = new ExtentSparkReporter(System.getProperty("user.dir") + "/reports/extent-report.html");
 		extentHtmlReporter.loadXMLConfig(System.getProperty("user.dir") + "/config/extent-config.xml");
-		
 		
 		extentReports = new ExtentReports();
 		extentReports.attachReporter(extentHtmlReporter);
@@ -50,29 +49,31 @@ public class ExtentBase extends TestBase {
 	}
 	
 	@BeforeMethod
-	public void setup(Method method) {
+	public void setup(ITestResult result) {
 		myList.clear();
+		//add test class and test method name to the report file
+		extentLogger = extentReports.createTest("@TestClass: " + result.getTestClass().getName() + 
+				"  @TestCase: "+ result.getMethod().getMethodName());
 	}
 
 	
 	@AfterMethod
 	public void tearDown(ITestResult result) throws IOException {
-		
 		// iterate over the comments stored in arraylist and print it in the report
 		for(int i=0; i<myList.size(); i++) {
 			if (result.getStatus() == ITestResult.SKIP) {
-				String logText = "<b><font color=\"blue\">" + myList.get(i) +"</font></b>";
+				String logText = "<font color=\"blue\">" + myList.get(i) +"</font>";
 				if (myList.get(i).contains(".png")) {
-					extentTest.skip("", MediaEntityBuilder.createScreenCaptureFromPath(myList.get(i)).build());
+					extentLogger.skip("", MediaEntityBuilder.createScreenCaptureFromPath(myList.get(i)).build());
 				} else {
-					extentTest.skip(logText);
+					extentLogger.skip(logText);
 				}
 			} else {
-				String logText = "<b><font color=\"blue\">" + myList.get(i) +"</font></b>";
+				String logText = "<font color=\"blue\">" + myList.get(i) +"</font>";
 				if (myList.get(i).contains(".png")) {
-					extentTest.pass("", MediaEntityBuilder.createScreenCaptureFromPath(myList.get(i)).build());
+					extentLogger.pass("", MediaEntityBuilder.createScreenCaptureFromPath(myList.get(i)).build());
 				} else {
-					extentTest.pass(logText);
+					extentLogger.pass(logText);
 				}
 			}
 		}
@@ -83,7 +84,7 @@ public class ExtentBase extends TestBase {
 			String exceptionText = "<details><summary><b><font color=\"red\">Click to see exception details"
 					+ "</font></b></summary>"+exceptionMessage.replaceAll(",", "<br>")+"</details> \n";
 			System.out.println("exceptionMessage" + exceptionMessage);
-			extentTest.fail(exceptionText);
+			extentLogger.fail(exceptionText);
 		}
 		
 		driver.quit();

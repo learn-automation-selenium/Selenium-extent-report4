@@ -12,9 +12,6 @@ public class SampleTest extends ExtentBase {
 
 	@Test
 	public void loginTest() throws IOException {
-		String methodName = new Throwable().getStackTrace()[0].getMethodName(); 
-		extentTest = extentReports.createTest(methodName);
-		
 		driver = new ChromeDriver();
 		driver.manage().window().maximize();
 		driver.get("http://www.google.com");
@@ -28,9 +25,6 @@ public class SampleTest extends ExtentBase {
 	
 	@Test
 	public void loginTest1() throws IOException {
-		String methodName = new Throwable().getStackTrace()[0].getMethodName(); 
-		extentTest = extentReports.createTest(methodName);
-		
 		driver = new ChromeDriver();
 		driver.manage().window().maximize();
 		driver.get("https://github.com/learn-automation-selenium/cucumber-extent-report");
